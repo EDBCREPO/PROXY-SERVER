@@ -8,9 +8,9 @@ const worker = require('worker_threads');
 
 /*-------------------------------------------------------------------------------------------------*/
 
+const PORT = process.env.PORT || 4000; 
 const threads = os.cpus().length * 2;
 const size = Math.pow(10,6) * 3;
-const PORT = 4000; 
 
 /*-------------------------------------------------------------------------------------------------*/
 
@@ -57,7 +57,8 @@ function app(req,res){
 
 if ( cluster.isPrimary ) {
     for ( let i=threads; i--; ) { cluster.fork();
-    } cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
+        console.log({ protocol: 'HTTPS', processID: process.pid });
+    }   cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
         console.log(`worker ${worker.process.pid} died by: ${code}`);
     });
 } else {
