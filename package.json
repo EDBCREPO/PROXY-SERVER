@@ -4,7 +4,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "author": "enmanuelbecerra",
-  "engines": { "node":"16.x" },
-  "scripts": { "start": "node main" },
-  "dependencies": { "molly-fetch": "^1.0.2" }
+  "engines": {
+    "node": "16.x"
+  },
+  "scripts": {
+    "start": "node main"
+  },
+  "dependencies": {
+    "molly-fetch": "^1.0.7"
+  }
 }

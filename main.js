@@ -39,9 +39,9 @@ function app(req,res){
         fetch(options).then((response)=>{
             res.writeHead( response.statusCode,response.headers );
             response.pipe( res );
-        }).catch((reject)=>{
+        }).catch((reject)=>{ console.log( reject )
             res.writeHead(504,{'Content-Type': 'text/html'});
-            res.end('error');
+            reject.pipe( res );
         })
           
     } catch(e) {
