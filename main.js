@@ -31,8 +31,8 @@ function app(req,res){
         const q = p.query; const data = new Array();
     
         const options = new Object();
-              options.url = req.url;
               options.headers = req.headers; 
+              options.url = q.url || req.url;
               options.responseType = 'stream';
               options.method = req.method || 'GET';
     
