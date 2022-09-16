@@ -8,9 +8,9 @@ const worker = require('worker_threads');
 
 /*-------------------------------------------------------------------------------------------------*/
 
-const PORT = process.env.PORT || 4000; 
-const threads = os.cpus().length * 2;
 const size = Math.pow(10,6) * 3;
+const threads = os.cpus().length * 2;
+const PORT = process.env.PORT || 3000; 
 
 /*-------------------------------------------------------------------------------------------------*/
 
@@ -24,8 +24,6 @@ function parseRange( range ){
 
 function app(req,res){
     try {
-
-        console.log( req.url );
         
         const _url = req.url; const p = url.parse(_url,true);
         const q = p.query; const data = new Array();
@@ -57,8 +55,8 @@ function app(req,res){
 
 if ( cluster.isPrimary ) {
     for ( let i=threads; i--; ) { cluster.fork();
-        console.log({ protocol: 'HTTPS', processID: process.pid });
-    }   cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
+        console.log({ protocol: 'HTTPS', processID: process.pid, port: PORT });
+    } cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
         console.log(`worker ${worker.process.pid} died by: ${code}`);
     });
 } else {
