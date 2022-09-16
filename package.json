@@ -3,8 +3,8 @@
   "name": "proxy",
   "version": "1.0.0",
   "main": "index.js",
-  "engine": { "node":16 },
   "author": "enmanuelbecerra",
+  "engines": { "node":"16.x" },
   "scripts": { "start": "node main" },
   "dependencies": { "molly-fetch": "^1.0.2" }
 }
