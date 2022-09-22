@@ -1,10 +1,11 @@
-const os = require('os');
-const url = require('url');
-const http = require('http');
-const cluster = require('cluster');
-const {Buffer} = require('buffer');
-const fetch = require('molly-fetch');
+
 const worker = require('worker_threads');
+const fetch = require('molly-fetch');
+const {Buffer} = require('buffer');
+const cluster = require('cluster');
+const http = require('http');
+const url = require('url');
+const os = require('os');
 
 /*-------------------------------------------------------------------------------------------------*/
 
@@ -35,19 +36,22 @@ function app(req,res){
               options.method = req.method || 'GET';
     
         if( req.headers.range ) options.headers.range = parseRange(req.headers.range);
+        if( !options.url.match(/http.+/gi) ){
+            res.writeHead( 200,{'content-type':'text/plain'} );
+            return res.end('send an url');
+        };  options.url = options.url.match(/http.+/gi).join('');
 
         fetch(options).then((response)=>{
-            res.writeHead( response.statusCode,response.headers );
-            response.pipe( res );
-        }).catch((reject)=>{ console.log( reject )
+            res.writeHead( response.status,response.headers );
+            response.data.pipe( res );
+        }).catch((reject)=>{
             res.writeHead(504,{'Content-Type': 'text/html'});
-            reject.pipe( res );
+            try{ reject.data.pipe( res ) } catch(e) { res.end('') }
         })
           
     } catch(e) {
         res.writeHead(504,{'Content-Type': 'text/html'});
         res.end(`error: ${e?.message}`);
-        console.log(e?.message);
     }
 }
 
@@ -55,7 +59,7 @@ function app(req,res){
 
 if ( cluster.isPrimary ) {
     for ( let i=threads; i--; ) { cluster.fork();
-        console.log({ protocol: 'HTTPS', processID: process.pid, port: PORT });
+        console.log({ protocol: 'HTTP', processID: process.pid, port: PORT });
     } cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
         console.log(`worker ${worker.process.pid} died by: ${code}`);
     });

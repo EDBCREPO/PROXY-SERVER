@@ -11,6 +11,6 @@
     "start": "node main"
   },
   "dependencies": {
-    "molly-fetch": "^1.0.8"
+    "molly-fetch": "^1.0.10"
   }
 }
