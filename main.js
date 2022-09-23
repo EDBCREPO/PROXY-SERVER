@@ -44,7 +44,7 @@ function app(req,res){
         fetch(options).then((response)=>{
             res.writeHead( response.status,response.headers );
             response.data.pipe( res );
-        }).catch((reject)=>{
+        }).catch((reject)=>{ console.log(reject?.message)
             res.writeHead(504,{'Content-Type': 'text/html'});
             try{ reject.data.pipe( res ) } catch(e) { res.end('') }
         })
@@ -56,17 +56,26 @@ function app(req,res){
 }
 
 /*-------------------------------------------------------------------------------------------------*/
+/*
+(()=>{
+    setInterval(()=>{
+        fetch('https://proxyserver-arepatv.herokuapp.com/')
+        .then(()=>{}).catch((e)=>{ console.log(e) })
+    },1000*60*5);
+})();
+*/
+/*-------------------------------------------------------------------------------------------------*/
 
-if ( cluster.isPrimary ) {
-    for ( let i=threads; i--; ) { cluster.fork();
-        console.log({ protocol: 'HTTP', processID: process.pid, port: PORT });
-    } cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
-        console.log(`worker ${worker.process.pid} died by: ${code}`);
-    });
-} else {
-    http.createServer(app).listen(PORT,'0.0.0.0',()=>{
-        if( !worker.isMainThread ) worker.parentPort.postMessage('done');
-    });
+try{
+    if ( cluster.isPrimary ) {
+        for ( let i=threads; i--; ) { cluster.fork();
+            console.log({ protocol: 'HTTP', processID: process.pid, port: PORT });
+        } cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
+            console.log(`worker ${worker.process.pid} died by: ${code}`);
+        });
+    } else { http.createServer(app).listen(PORT,'0.0.0.0',()=>{}); }
+} catch(e) {
+    http.createServer(app).listen(PORT,'0.0.0.0',()=>{});
 }
 
 /*-------------------------------------------------------------------------------------------------*/
