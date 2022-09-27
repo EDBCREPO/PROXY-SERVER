@@ -11,7 +11,7 @@ const os = require('os');
 
 const size = Math.pow(10,6) * 3;
 const threads = os.cpus().length * 2;
-const PORT = process.env.PORT || 999; 
+const PORT = process.env.PORT || 9999; 
 
 /*-------------------------------------------------------------------------------------------------*/
 
@@ -34,7 +34,7 @@ function app(req,res){
               options.url = q.url || req.url;
               options.responseType = 'stream';
               options.method = req.method || 'GET';
-    
+        
         if( req.headers.range ) options.headers.range = parseRange(req.headers.range);
         if( !options.url.match(/http.+/gi) ){
             res.writeHead( 200,{'content-type':'text/plain'} );
@@ -44,8 +44,8 @@ function app(req,res){
         fetch(options).then((response)=>{
             res.writeHead( response.status,response.headers );
             response.data.pipe( res );
-        }).catch((reject)=>{ console.log(reject?.message)
-            res.writeHead(504,{'Content-Type': 'text/html'});
+        }).catch((reject)=>{
+            res.writeHead(204,{'Content-Type': 'text/html'});
             try{ reject.data.pipe( res ) } catch(e) { res.end('') }
         })
           
@@ -57,16 +57,13 @@ function app(req,res){
 
 /*-------------------------------------------------------------------------------------------------*/
 
-try{
-    if ( cluster.isPrimary ) {
-        for ( let i=threads; i--; ) { cluster.fork();
-            console.log({ protocol: 'HTTP', processID: process.pid, port: PORT });
-        } cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
-            console.log(`worker ${worker.process.pid} died by: ${code}`);
-        });
-    } else { http.createServer(app).listen(PORT,'0.0.0.0',()=>{}); }
-} catch(e) {
-    http.createServer(app).listen(PORT,'0.0.0.0',()=>{});
-}
+if ( cluster.isPrimary ) {
+    for ( let i=threads; i--; ) { cluster.fork(); } 
+    cluster.on('exit', (worker, code, signal)=>{ cluster.fork();
+        console.log(`worker ${worker.process.pid} died by: ${code}`);
+    });
+} else { http.createServer(app).listen(PORT,'0.0.0.0',()=>{
+    if( !worker.isMainThread ) worker.parentPort.postMessage('done');
+})}
 
 /*-------------------------------------------------------------------------------------------------*/
